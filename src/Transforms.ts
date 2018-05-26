@@ -59,17 +59,22 @@ export function trimLines(textEditor: vscode.TextEditor, ranges: Array<vscode.Ra
    }
    Modify.replace(textEditor,ranges[0],trimmedResult)
 }
-export function uniqueLines(textEditor: vscode.TextEditor, ranges: Array<vscode.Range>) {
+
+export function uniqueLines(textEditor: vscode.TextEditor, ranges: Array<vscode.Range>, strict: boolean) {
     if(ranges.length === 1) {
         const rangeBlock = Region.expandRangeToBlockIfEmpty(textEditor, ranges[0]);
         const lines = Lines.linesFromRange(textEditor.document, rangeBlock);
-        const uniqueMep = new Map()
+        const uniqueMep = new Map();
+        const seenLines = new Map();
         lines.forEach(line => {
+            if(uniqueMep.has(line.text))
+                seenLines.set(line.lineNumber, true);
             uniqueMep.set(line.text, line);
         });
-
-        const uniqueLines = uniqueMep.values()
-        const linesArray = Array.from(uniqueLines);
+        let uniqueLines = uniqueMep.values()
+        let linesArray:any[] = Array.from(uniqueLines);
+        if(strict)
+            linesArray = linesArray.filter(line => !seenLines.has(line.lineNumber));
         Modify.replace(textEditor, rangeBlock, Lines.textFromLines(textEditor.document, linesArray));
     }
 }
@@ -85,6 +90,7 @@ export function uniqueLinesToNewDocument(textEditor: vscode.TextEditor, ranges: 
     const linesArray = Array.from(uniqueLines);
     View.openShowDocument(originName(textEditor), Lines.textFromLines(textEditor.document, linesArray));
 }
+
 export function countUniqueLinesToNewDocument(textEditor: vscode.TextEditor, ranges: Array<vscode.Range>) {
     const lines = linesFromRangesExpandBlockIfEmpty(textEditor, ranges);
     const duplicateNumbers = 0;

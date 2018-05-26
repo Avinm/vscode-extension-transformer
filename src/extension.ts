@@ -1,7 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import * as transforms from './Transforms';
-import {Modify, View, Application} from 'vscode-extension-common'
+import {Modify, View, Application} from 'vscode-extension-common';
 /**
  * TODO - planned features:
  * - unique selections as new document
@@ -44,7 +44,14 @@ export function activate(context: vscode.ExtensionContext) {
     disposable = vscode.commands.registerCommand('dakara-transformer.uniqueLines', () => {
         const textEditor = vscode.window.activeTextEditor;
         const selections = textEditor.selections;
-        transforms.uniqueLines(textEditor, selections);
+        transforms.uniqueLines(textEditor, selections, false);
+    });
+    context.subscriptions.push(disposable);
+
+    disposable = vscode.commands.registerCommand('dakara-transformer.uniqueLinesStrict', () => {
+        const textEditor = vscode.window.activeTextEditor;
+        const selections = textEditor.selections;
+        transforms.uniqueLines(textEditor, selections, true);
     });
     context.subscriptions.push(disposable);
 
